@@ -6,10 +6,10 @@
   <title>Sweta, will you be my Valentine?</title>
   <meta name="description" content="A tiny interactive story for Sweta." />
 
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet" />
 
   <style>
     :root{
@@ -146,17 +146,6 @@
       touch-action: none;
     }
 
-    /* Reveal block after YES */
-    .reveal-wrap[hidden]{ display: none !important; }
-    .reveal-wrap{
-      margin-top: 14px;
-      animation: fadeIn .5s ease both;
-    }
-    @keyframes fadeIn{
-      from{ opacity: 0; transform: translateY(8px); }
-      to{ opacity: 1; transform: none; }
-    }
-
     /* Footer note */
     .note{
       font-size: 13px; color: #8a8a8a; margin-top: 12px;
@@ -179,7 +168,7 @@
     <section id="s1" aria-labelledby="t1">
       <div class="content">
         <h2 id="t1">This story starts with someone amazing…</h2>
-        <img src="sweta.jpg" alt="A lovely photo of Sweta." class="photo" />
+        <img class="photo" src="sweta.jpg" alt="A lovely photo of Sweta" />
         <p>I made a tiny page for you.</p>
       </div>
     </section>
@@ -188,7 +177,7 @@
     <section id="s2" aria-labelledby="t2">
       <div class="content">
         <h2 id="t2">…and someone who thinks she’s pretty great.</h2>
-        <img src="me.jpg" alt="My photo, smiling." class="photo" />
+        <img class="photo" src="me.jpg" alt="A photo of me, smiling" />
         <p>I am really glad we met, Sweta.</p>
       </div>
     </section>
@@ -212,13 +201,6 @@
             <button class="btn btn-ghost no-btn" id="noBtn" aria-label="No (just teasing)">No… maybe?</button>
           </span>
         </div>
-
-        <!-- Reveal after YES -->
-        <div id="yesReveal" class="reveal-wrap" hidden>
-          <img src="no-option.jpg" alt="Me with a playful caption: No was never an option." class="photo"/>
-          <h2 style="margin-top:12px;">No was never an option.</h2>
-        </div>
-
         <div class="note" id="responseNote" aria-live="polite"></div>
       </div>
     </section>
@@ -276,13 +258,6 @@
     function celebrate(){
       note.textContent = "Yay! I will plan something lovely for us. 🌹";
       for(let i=0;i<16;i++) setTimeout(spawnHeart, i*80);
-
-      // Reveal the photo + caption
-      const reveal = document.getElementById('yesReveal');
-      if (reveal) {
-        reveal.hidden = false;
-        reveal.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
     }
     yesBtn.addEventListener('click', celebrate);
     alsoYesBtn.addEventListener('click', celebrate);
