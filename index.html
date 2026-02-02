@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sweta, will you be my Valentine?</title>
+  <meta name="description" content="A tiny interactive story for Sweta." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root{
+      /* Romantic pink-red palette */
+      --bg:#fff7fb;
+      --ink:#1f1f1f;
+      --muted:#6e6e6e;
+      --accent:#ff466d;   /* main pink-red */
+      --accent-2:#ffc0d0; /* soft tint */
+      --card:#ffffff;
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+      --radius: 18px;
+    }
+
+    /* Reset & base */
+    *,*::before,*::after{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--ink)}
+    body{
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      line-height:1.6;
+      overflow-x:hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .wrap{ scroll-behavior:smooth; }
+
+    /* Sections */
+    section{
+      min-height:100svh;
+      display:grid;
+      place-items:center;
+      padding: clamp(16px, 4vw, 48px);
+      position:relative;
+      isolation:isolate;
+    }
+    .content{
+      max-width:min(900px, 92vw);
+      text-align:center;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding: clamp(20px, 4vw, 48px);
+      border: 1px solid rgba(0,0,0,.05);
+      opacity:0;
+      transform: translateY(18px);
+      transition: opacity .8s ease, transform .8s ease;
+    }
+    .content.reveal{ opacity:1; transform:none; }
+
+    /* Typography */
+    h1,h2{
+      font-family: "Playfair Display", Georgia, serif;
+      line-height:1.2;
+      margin: 0 0 .35em 0;
+    }
+    h1{ font-size: clamp(28px, 5vw, 48px); }
+    h2{ font-size: clamp(24px, 4vw, 36px); color:var(--accent); }
+    p{ font-size: clamp(16px, 2.4vw, 18px); color:var(--muted); margin:.25em 0 0; }
+
+    /* Photos */
+    .photo{
+      width: min(360px, 78vw);
+      aspect-ratio: 4/5;
+      object-fit: cover;
+      border-radius: calc(var(--radius) + 6px);
+      box-shadow: var(--shadow);
+      border: 6px solid #fff;
+      margin-top: 10px;
+    }
+
+    /* Heart floaters */
+    .hearts{
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      pointer-events:none;
+      z-index: 0;
+    }
+    .heart{
+      position:absolute;
+      font-size: 14px;
+      color: var(--accent);
+      opacity:.9;
+      animation: floatUp linear forwards;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,.12));
+    }
+    @keyframes floatUp{
+      from{ transform: translateY(10vh) translateX(0) scale(0.9); opacity:.0; }
+      10%{ opacity: .9; }
+      to{ transform: translateY(-110vh) translateX(var(--drift)) scale(1.2); opacity:0; }
+    }
+
+    /* Buttons */
+    .btns{
+      display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:18px;
+    }
+    .btn{
+      appearance:none; border:0; cursor:pointer;
+      padding: 12px 18px; border-radius: 999px;
+      font-weight:600; font-size: 16px;
+      transition: transform .15s ease, background .2s ease, box-shadow .2s ease, color .2s ease;
+      box-shadow: 0 6px 18px rgba(0,0,0,.08);
+    }
+    .btn-primary{
+      background: var(--accent); color:#fff;
+    }
+    .btn-primary:hover{ transform: translateY(-2px); }
+    .btn-secondary{
+      background: #fff; color: var(--ink); border:1px solid rgba(0,0,0,.08);
+    }
+    .btn-secondary:hover{ transform: translateY(-2px); }
+    .btn-ghost{
+      background:transparent; color:var(--muted);
+      border:1px dashed rgba(0,0,0,.18);
+      position:relative;
+    }
+
+    /* Playful “No” */
+    .no-wrapper{
+      position: relative;
+      display:inline-block;
+      min-width: 120px;
+      min-height: 44px;
+    }
+    .no-btn{
+      position: relative;
+      z-index: 1;
+    }
+    .no-wrapper.dodge .no-btn{
+      position: absolute;
+      left: var(--x, 0);
+      top: var(--y, 0);
+      transition: left .15s ease, top .15s ease;
+      touch-action: none;
+    }
+
+    /* Footer note */
+    .note{
+      font-size: 13px; color: #8a8a8a; margin-top: 12px;
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .content{ transition: none; }
+      .heart{ animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Floating hearts layer -->
+  <div class="hearts" aria-hidden="true"></div>
+
+  <main class="wrap" id="top" role="main">
+
+    <!-- Section 1 -->
+    <section id="s1" aria-labelledby="t1">
+      <div class="content">
+        <h2 id="t1">This story starts with someone amazing…</h2>
+        <img class="photo" src="sweta.jpg" alt="A lovely photo of Sweta" />
+        <p>I made a tiny page for you.</p>
+      </div>
+    </section>
+
+    <!-- Section 2 -->
+    <section id="s2" aria-labelledby="t2">
+      <div class="content">
+        <h2 id="t2">…and someone who thinks she’s pretty great.</h2>
+        <img class="photo" src="me.jpg" alt="A photo of me, smiling" />
+        <p>I am really glad we met, Sweta.</p>
+      </div>
+    </section>
+
+    <!-- Section 3 -->
+    <section id="s3" aria-labelledby="t3">
+      <div class="content">
+        <h1 id="t3">As the days go by, one thought keeps floating up…</h1>
+        <p>Swipe or scroll a little more.</p>
+      </div>
+    </section>
+
+    <!-- Final Section -->
+    <section id="final" aria-labelledby="tf">
+      <div class="content">
+        <h1 id="tf">Sweta, will you be my Valentine?</h1>
+        <div class="btns" role="group" aria-label="Response options">
+          <button class="btn btn-primary" id="yesBtn">Yes ❤️</button>
+          <button class="btn btn-secondary" id="alsoYesBtn">Also Yes 😄</button>
+          <span class="no-wrapper" id="noWrap">
+            <button class="btn btn-ghost no-btn" id="noBtn" aria-label="No (just teasing)">No… maybe?</button>
+          </span>
+        </div>
+        <div class="note" id="responseNote" aria-live="polite"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Intersection-based reveal
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){ e.target.classList.add('reveal'); }
+      })
+    }, { threshold: .2 });
+
+    document.querySelectorAll('.content').forEach(c=>observer.observe(c));
+
+    // Heart generator
+    const heartLayer = document.querySelector('.hearts');
+    const emojis = ['❤️','💕','💖','💗','💘','💞'];
+    function spawnHeart(){
+      const h = document.createElement('div');
+      h.className = 'heart';
+      h.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+      const x = Math.random()*100;          // vw
+      const dur = 6 + Math.random()*4;      // seconds
+      const delay = Math.random()*1.5;
+      const drift = (Math.random()*60 - 30) + 'px';
+      h.style.left = x + 'vw';
+      h.style.bottom = '-10vh';
+      h.style.setProperty('--drift', drift);
+      h.style.animationDuration = dur + 's';
+      h.style.animationDelay = delay + 's';
+      heartLayer.appendChild(h);
+      // cleanup
+      setTimeout(()=> h.remove(), (dur+delay)*1000 + 100);
+    }
+
+    // Gentle flow: more hearts when user scrolls
+    let baseInterval = setInterval(spawnHeart, 900);
+    let scrollBoostTimer;
+    window.addEventListener('scroll', ()=>{
+      for(let i=0;i<3;i++) spawnHeart();
+      clearTimeout(scrollBoostTimer);
+      const fast = setInterval(spawnHeart, 220);
+      scrollBoostTimer = setTimeout(()=> clearInterval(fast), 800);
+    }, { passive:true });
+
+    // Buttons behavior
+    const yesBtn = document.getElementById('yesBtn');
+    const alsoYesBtn = document.getElementById('alsoYesBtn');
+    const noBtn = document.getElementById('noBtn');
+    const noWrap = document.getElementById('noWrap');
+    const note = document.getElementById('responseNote');
+
+    function celebrate(){
+      note.textContent = "Yay! I will plan something lovely for us. 🌹";
+      for(let i=0;i<16;i++) setTimeout(spawnHeart, i*80);
+    }
+    yesBtn.addEventListener('click', celebrate);
+    alsoYesBtn.addEventListener('click', celebrate);
+
+    // Playful "No" that dodges cursor / tap
+    function moveNo(){
+      noWrap.classList.add('dodge');
+      const rand = (n)=> (Math.random()*n - n/2);
+      const x = Math.max(-160, Math.min(160, rand(280)));
+      const y = Math.max(-90, Math.min(90, rand(160)));
+      noWrap.style.setProperty('--x', x+'px');
+      noWrap.style.setProperty('--y', y+'px');
+    }
+    noBtn.addEventListener('mouseenter', moveNo);
+    noBtn.addEventListener('focus', moveNo);
+    noBtn.addEventListener('touchstart', (e)=>{ e.preventDefault(); moveNo(); });
+
+    // Start at top for the “journey”
+    window.history.scrollRestoration = 'manual';
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  </script>
+</body>
+</html>
