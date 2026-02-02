@@ -250,7 +250,7 @@
       heartLayer.appendChild(h);
       setTimeout(()=> h.remove(), (dur+delay)*1000 + 100);
     }
-    let baseInterval = setInterval(spawnHeart, 1500);
+    let baseInterval = setInterval(spawnHeart, 2000);
     let scrollBoostTimer;
     window.addEventListener('scroll', ()=>{
       for(let i=0;i<1;i++) spawnHeart();
@@ -316,4 +316,5 @@
   </script>
 </body>
 </html>
+
 
