@@ -99,8 +99,7 @@
       transition: transform .25s ease, box-shadow .25s ease;
     }
     .photo.polaroid:hover {
-      transform: rotate(0deg) scale(1.02);
-      box-shadow: 0 18px 48px rgba(255, 70, 109, .28), 0 10px 30px rgba(0,0,0,.1);
+      transform: rotate(0deg) scale(1.01); /* lighter hover for performance */
     }
 
     /* Heart floaters */
@@ -111,18 +110,23 @@
       pointer-events:none;
       z-index: 0;
     }
+    /* Fewer, bigger hearts for impact but lower CPU */
     .heart{
       position:absolute;
-      font-size: 14px;
+      font-size: 22px; /* was 14px */
       color: var(--accent);
       opacity:.9;
       animation: floatUp linear forwards;
       filter: drop-shadow(0 2px 6px rgba(0,0,0,.12));
     }
+    @media (max-width: 600px){
+      .heart { font-size: 28px; } /* larger on phones */
+    }
+
     @keyframes floatUp{
-      from{ transform: translateY(10vh) translateX(0) scale(0.9); opacity:.0; }
+      from{ transform: translateY(10vh) translateX(0) scale(0.95); opacity:.0; }
       10%{ opacity: .9; }
-      to{ transform: translateY(-110vh) translateX(var(--drift)) scale(1.2); opacity:0; }
+      to{ transform: translateY(-110vh) translateX(var(--drift)) scale(1.15); opacity:0; }
     }
 
     /* Confetti layer */
@@ -231,32 +235,46 @@
     }, { threshold: .2 });
     document.querySelectorAll('.content').forEach(c=>observer.observe(c));
 
-    // Heart generator
+    // --- Hearts: fewer, bigger, capped ---
     const heartLayer = document.querySelector('.hearts');
     const emojis = ['❤️','💕','💖','💗','💘','💞'];
+
+    // Track active hearts to avoid DOM overload
+    let activeHearts = 0;
+    const MAX_HEARTS = 14;     // hard cap on-screen
+    const BASE_EMIT_MS = 1800; // slower base rate (was 900)
+    const SCROLL_BURST = 1;    // spawn 1 on scroll (was 3)
+
     function spawnHeart(){
+      if (activeHearts >= MAX_HEARTS) return; // cap
       const h = document.createElement('div');
       h.className = 'heart';
       h.textContent = emojis[Math.floor(Math.random()*emojis.length)];
-      const x = Math.random()*100;          // vw
-      const dur = 6 + Math.random()*4;      // seconds
-      const delay = Math.random()*1.5;
+
+      const x = Math.random()*100;              // vw
+      const dur = 7 + Math.random()*4;          // longer duration => fewer spawns
+      const delay = Math.random()*0.8;
       const drift = (Math.random()*60 - 30) + 'px';
+
       h.style.left = x + 'vw';
       h.style.bottom = '-10vh';
       h.style.setProperty('--drift', drift);
       h.style.animationDuration = dur + 's';
       h.style.animationDelay = delay + 's';
+
+      // Count & cleanup
+      activeHearts++;
+      h.addEventListener('animationend', () => { h.remove(); activeHearts--; });
+
       heartLayer.appendChild(h);
-      setTimeout(()=> h.remove(), (dur+delay)*1000 + 100);
     }
-    let baseInterval = setInterval(spawnHeart, 2000);
-    let scrollBoostTimer;
+
+    // Base emission (slower)
+    let baseInterval = setInterval(spawnHeart, BASE_EMIT_MS);
+
+    // Scroll: tiny burst
     window.addEventListener('scroll', ()=>{
-      for(let i=0;i<1;i++) spawnHeart();
-      clearTimeout(scrollBoostTimer);
-      const fast = setInterval(spawnHeart, 220);
-      scrollBoostTimer = setTimeout(()=> clearInterval(fast), 800);
+      for(let i=0; i<SCROLL_BURST; i++) spawnHeart();
     }, { passive:true });
 
     // Confetti
@@ -267,14 +285,26 @@
     window.addEventListener('resize', resizeConfetti); resizeConfetti();
     function launchConfetti(){
       const colors = ['#ff466d', '#ffb3c7', '#ffd5e1', '#ffffff'];
-      const count = 80;
+      const count = 35; // lighter than before
       for(let i=0;i<count;i++){
-        confettiPieces.push({ x: Math.random()*confettiCanvas.width, y: -10, r: 3 + Math.random()*4, c: colors[i % colors.length], vx: -2 + Math.random()*4, vy: 2 + Math.random()*3, a: Math.random()*Math.PI*2 });
+        confettiPieces.push({
+          x: Math.random()*confettiCanvas.width,
+          y: -10,
+          r: 3 + Math.random()*4,
+          c: colors[i % colors.length],
+          vx: -2 + Math.random()*4,
+          vy: 2 + Math.random()*3,
+          a: Math.random()*Math.PI*2
+        });
       }
     }
     function drawConfetti(){
       ctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
-      confettiPieces.forEach(p=>{ p.x += p.vx; p.y += p.vy; p.vy *= 0.99; p.a += 0.05; ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a); ctx.fillStyle = p.c; ctx.fillRect(-p.r, -p.r, p.r*2, p.r*2); ctx.restore(); });
+      confettiPieces.forEach(p=>{
+        p.x += p.vx; p.y += p.vy; p.vy *= 0.99; p.a += 0.05;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a);
+        ctx.fillStyle = p.c; ctx.fillRect(-p.r, -p.r, p.r*2, p.r*2); ctx.restore();
+      });
       confettiPieces = confettiPieces.filter(p=> p.y < confettiCanvas.height + 20);
       requestAnimationFrame(drawConfetti);
     }
@@ -289,10 +319,21 @@
 
     function celebrate(){
       note.textContent = "Yay! I will plan something lovely for us. 🌹";
-      for(let i=0;i<16;i++) setTimeout(spawnHeart, i*80);
+
+      // TEMP: pause base heart spawns during the confetti burst
+      clearInterval(baseInterval);
+      setTimeout(()=> { baseInterval = setInterval(spawnHeart, BASE_EMIT_MS); }, 1500);
+
+      // Confetti + a few bonus hearts without breaking the cap
       launchConfetti();
+      for(let i=0;i<3;i++) setTimeout(spawnHeart, i*120);
+
+      // Reveal the photo + caption
       const reveal = document.getElementById('yesReveal');
-      if (reveal) { reveal.hidden = false; reveal.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      if (reveal) {
+        reveal.hidden = false;
+        reveal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     }
     yesBtn.addEventListener('click', celebrate);
     alsoYesBtn.addEventListener('click', celebrate);
@@ -316,5 +357,3 @@
   </script>
 </body>
 </html>
-
-
